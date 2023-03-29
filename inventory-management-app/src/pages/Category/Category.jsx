@@ -54,12 +54,6 @@ const Category = () => {
 	useEffect(() => {
 		document.title="Category";
 		getAllCategories();
-		// const fetchCategories = async () => {
-		// 	const res = await getAllCategories();
-		// 	console.log("res ----", res);
-		// 	setCategories(await getAllCategories());
-		// }
-		// fetchCategories();
 	}, [categoryForEdit]);
 
 	const getAllCategories = () => {

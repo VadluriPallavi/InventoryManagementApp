@@ -282,7 +282,6 @@ const Items = () => {
 		axios.delete(`${base_url}/items/${itemId}`).then(
 			(response) => {
 				const newItems = items.filter((item) => item.itemId !== itemId);
-				console.log("newItems after delete", newItems);
 				setItems(newItems);
 				getAllItems();
 			},
