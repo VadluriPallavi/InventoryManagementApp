@@ -16,12 +16,31 @@ const AddCategory = (props) => {
 
 	const { categoryForEdit, addOrEditCategory} = props;
 
+	const validate = (fieldValues = values) => {
+
+		let temp = {...errors}
+
+		if (fieldValues.categoryName === "") {
+			temp.category = "Category is required";
+		}
+
+		setErrors({
+			...temp
+		})
+		
+		if (fieldValues === values) {
+			return Object.values(temp).every(x => x === "");
+		}
+	}
+
 	const {
 		values, 
 		setValues,
+		errors,
+		setErrors,
 		handleInputChange,
 		resetForm
-	} = useCustomForm(initialFValues);
+	} = useCustomForm(initialFValues, true, validate);
 
 	useEffect(() => {
 		if (categoryForEdit != null) {
@@ -30,7 +49,6 @@ const AddCategory = (props) => {
 			})
 		}
 	}, [categoryForEdit]);
-
 
 	const handleSubmit = e => {
 		e.preventDefault()
@@ -47,6 +65,7 @@ const AddCategory = (props) => {
 						variant="outlined"
 						value={values.categoryName}
 						onChange={handleInputChange}
+						error={errors.categoryName}
 					>
 					</Input>
 				</Grid>

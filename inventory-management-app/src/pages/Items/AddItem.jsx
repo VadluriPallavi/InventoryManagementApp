@@ -6,6 +6,7 @@ import { Form, useCustomForm } from '../../components/Form';
 import Input from '../../components/Input';
 import base_url from "../../api/constants";
 import axios from "axios";
+import Alert from '@mui/material/Alert';
 
 const initialFValues = {
 	itemId: 0,
@@ -36,7 +37,10 @@ const AddItem = (props) => {
 	const [remainingShelfSpace, setRemainingShelfSpace] = useState(100);
 
 	const [vendors, setVendors] = useState();
-	const [categories, setCategories] = useState();
+	const [vendorsErrorMessage, setVendorsErrorMessage] = useState();
+
+	const [categories, setCategories] = useState(null);
+	const [categoriesErrorMessage, setCategoriesErrorMessage] = useState();
 
 	const validate = (fieldValues = values) => {
 
@@ -136,8 +140,10 @@ const AddItem = (props) => {
 		axios.get(`${base_url}/vendors`).then(
 			(response) => {
 				setVendors(response.data);
+				setVendorsErrorMessage("")
 			},
 			(error) => {
+				setVendorsErrorMessage(error.response.data.message);
 			}
 		)
 	}
@@ -146,8 +152,10 @@ const AddItem = (props) => {
 		axios.get(`${base_url}/categories`).then(
 			(response) => {
 				setCategories(response.data);
+				setCategoriesErrorMessage("");
 			},
 			(error) => {
+				setCategoriesErrorMessage(error.response.data.message);
 			}
 		)
 
@@ -254,7 +262,12 @@ const AddItem = (props) => {
 								/>
 							)
 						}
-					
+						{
+							categoriesErrorMessage && 
+							<Alert variant="outlined" severity="error">
+								{categoriesErrorMessage}
+							</Alert>
+						}
 					</Grid>
 					<Grid item pb={2} sx={{ width: 185 }}>
 						{
@@ -278,6 +291,12 @@ const AddItem = (props) => {
 									}}
 								/>
 							)
+						}
+						{
+							vendorsErrorMessage && 
+							<Alert variant="outlined" severity="error">
+								{vendorsErrorMessage}
+							</Alert>
 						}
 					</Grid>
 				</Grid>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState} from "react";
-import { Paper, Box, Button, InputAdornment, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TableSortLabel, Toolbar} from "@mui/material"
+import { Paper, Box, Button, InputAdornment, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TableSortLabel, Toolbar, Grid} from "@mui/material"
 import axios from "axios";
 import base_url from "../../api/constants";
 import Input from "../../components/Input";
@@ -11,6 +11,7 @@ import Popup from "../../components/Popup";
 import AddIcon from '@mui/icons-material/Add';
 import AddVendor from "./AddVendor";
 import { makeStyles } from '@mui/styles';
+import Alert from '@mui/material/Alert';
 
 const dialogTitle = "Add Vendor";
 
@@ -31,6 +32,7 @@ const useStyles = makeStyles(theme => ({
 const Vendors = () => {
 	const classes = useStyles();
 	const [vendors, setVendors] = useState();
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -54,8 +56,10 @@ const Vendors = () => {
 		axios.get(`${base_url}/vendors`).then(
 			(response) => {
 				setVendors(response.data);
+				setErrorMessage("");
 			},
 			(error) => {
+				setErrorMessage(error.response.data.message);
 			}
 		)
 	}
@@ -241,39 +245,49 @@ const Vendors = () => {
 	return (
 		<Box>
 			{
+				errorMessage && 
+				<Alert variant="outlined" severity="error">
+					{errorMessage}
+				</Alert>
+			}
+			{
 				<>
 					<Paper className={classes.pageContent}>
 						<Toolbar>
-							<Input
-								name="vendorName"
-								label="Search Vendors"
-								className="search-vendor"
-								InputProps={{
-									startAdornment: (
-										<InputAdornment>
-											<Search/>
-										</InputAdornment>
-										
-									)
-								}}
-								onChange={handleVendorSearch}
-							/>
-							<Button
-								text="Add vendor"
-								variant="outlined"
-								className="add-new-vendor-button"
-								onClick={() => {
-									setOpenPopup(true)
-									setVendorForEdit(null);
-								}}
-							>
-								<AddIcon
-									className="add-vendor"
-									text="Add New"
-									// fontSize="large"
+							<Grid item m={1} pr={1}>
+								<Input
+									name="vendorName"
+									label="Search Vendors"
+									className="search-vendor"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment>
+												<Search/>
+											</InputAdornment>
+											
+										)
+									}}
+									onChange={handleVendorSearch}
 								/>
-								<p>Add vendor</p>
-							</Button>
+							</Grid>
+							<Grid item m={1} pr={1}>
+								<Button
+									text="Add vendor"
+									variant="outlined"
+									className="add-new-vendor-button"
+									onClick={() => {
+										setOpenPopup(true)
+										setVendorForEdit(null);
+									}}
+								>
+									<AddIcon
+										className="add-vendor"
+										text="Add New"
+										// fontSize="large"
+									/>
+									<p>Add new vendor</p>
+								</Button>
+							</Grid>
 						</Toolbar>
 						{
 							vendors && (

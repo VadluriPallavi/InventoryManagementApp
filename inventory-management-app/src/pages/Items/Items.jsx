@@ -19,6 +19,7 @@ import ItemLocations from "./ItemLocations";
 import FilterListPopUp from "./FilterListPopUp";
 import AddMoreItems from "./AddMoreItems";
 import Tooltip from '@mui/material/Tooltip';
+import Alert from '@mui/material/Alert';
 
 const dialogTitle = "Add Item";
 const editItemDialogTitle = "Edit Item";
@@ -42,6 +43,7 @@ const useStyles = makeStyles(theme => ({
 const Items = () => {
 	const classes = useStyles();
 	const [items, setItems] = useState();
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -86,6 +88,7 @@ const Items = () => {
 				setItems(response.data);
 			},
 			(error) => {
+				setErrorMessage(error.response.data.message);
 			}
 		)
 	}
@@ -142,6 +145,7 @@ const Items = () => {
 			await axios.post(`${base_url}/items/filterspecification`, requestBody).then(
 				(response) => {
 					setFilterListItems(response.data);
+					setErrorMessage("");
 				},
 				(error) => {
 				}
@@ -242,7 +246,15 @@ const Items = () => {
 		}
 		axios.post(`${base_url}/items`, requestBody).then(
 			(response) => {
+				if (response.data.code === 208) {
+					setErrorMessage("Item already exists : " + item.itemName);
+				} else {
+					setErrorMessage("");
+				}
 				getAllItems();
+			},
+			(error) => {
+				setErrorMessage(error.response.data.message + " : " + item.itemName);
 			}
 		)
 	}
@@ -270,12 +282,13 @@ const Items = () => {
 		axios.delete(`${base_url}/items/${itemId}`).then(
 			(response) => {
 				const newItems = items.filter((item) => item.itemId !== itemId);
+				console.log("newItems after delete", newItems);
 				setItems(newItems);
+				getAllItems();
 			},
 			(error) => {
 			}
 		);
-		await getAllItems();
 		setViewItemLocations(false);
 		setFilterListItems(null);
 	}
@@ -446,6 +459,12 @@ const Items = () => {
 
 	return (
 		<Box sx={{ width: '120%', mb: 2 }} >
+			{
+				errorMessage && 
+				<Alert variant="outlined" severity="error">
+					{errorMessage}
+				</Alert>
+			}
 			{
 				<>
 					<Paper className={classes.pageContent} >

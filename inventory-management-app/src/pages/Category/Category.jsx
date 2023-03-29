@@ -1,4 +1,4 @@
-import { Box, InputAdornment, Paper, Table, TableBody, TableCell, TableHead, TableRow, Toolbar, Button, TableSortLabel, TablePagination } from "@mui/material"
+import { Box, InputAdornment, Paper, Table, TableBody, TableCell, TableHead, TableRow, Toolbar, Button, TableSortLabel, TablePagination, Grid } from "@mui/material"
 import React, { useEffect , useState} from "react";
 import axios from "axios";
 import base_url from "../../api/constants";
@@ -12,7 +12,9 @@ import Popup from "../../components/Popup";
 import AddCategory from "./AddCategory";
 import ActionButton from "../../components/ActionButton";
 import { makeStyles } from '@mui/styles';
+import Alert from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
+import { getAllCategories } from "../../services/categoryService";
 
 const dialogTitle = "Add Category";
 
@@ -32,7 +34,9 @@ const useStyles = makeStyles(theme => ({
 
 const Category = () => {
 	const classes = useStyles();
-	const [categories, setCategories] = useState();
+	const [categories, setCategories] = useState(null);
+
+	const [errorMessage, setErrorMessage] = useState("");
 	
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -50,14 +54,22 @@ const Category = () => {
 	useEffect(() => {
 		document.title="Category";
 		getAllCategories();
+		// const fetchCategories = async () => {
+		// 	const res = await getAllCategories();
+		// 	console.log("res ----", res);
+		// 	setCategories(await getAllCategories());
+		// }
+		// fetchCategories();
 	}, [categoryForEdit]);
 
 	const getAllCategories = () => {
 		axios.get(`${base_url}/categories`).then(
 			(response) => {
 				setCategories(response.data);
+				setErrorMessage("");
 			},
 			(error) => {
+				setErrorMessage(error.response.data.message);
 			}
 		)
 
@@ -124,6 +136,9 @@ const Category = () => {
 		await axios.post(`${base_url}/categories`, category).then(
 			(response) => {
 				getAllCategories();
+			},
+			(error) => {
+				setErrorMessage(error.response.data.message + " : " + category.categoryName);
 			}
 		);
 		
@@ -212,39 +227,47 @@ const Category = () => {
 	return (
 		<Box sx={{ width: '120%', mb: 2 }}>
 			{
+				errorMessage && 
+				<Alert variant="outlined" severity="error">
+					{errorMessage}
+				</Alert>
+			}
+			{
 				<>
 					<Paper className={classes.pageContent}>
 						<Toolbar>
-							<Controls.Input
-								name="categoryName"
-								label="Search Categories"
-								className="search-category"
-								InputProps={{
-									startAdornment: (
-										<InputAdornment>
-											<Search/>
-										</InputAdornment>
-									)
-								}}
-								onChange={handleCategorySearch}
-							/>
-							<Button
-								text="Add category"
-								variant="outlined"
-								className="add-new-category-button"
-								onClick={() => {
-									setOpenPopup(true)
-									setCategoryForEdit(null);
-								}}
-							>
-								<AddIcon
-									className="add-category"
-									text="Add New"
-									// fontSize="large"
+							<Grid item m={1} pr={1}>
+								<Controls.Input
+									name="categoryName"
+									label="Search Categories"
+									className="search-category"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment>
+												<Search/>
+											</InputAdornment>
+										)
+									}}
+									onChange={handleCategorySearch}
 								/>
-								<p>Add category</p>
-							</Button>
-
+							</Grid>
+							<Grid item m={1} pr={1}>
+								<Button
+									text="Add category"
+									variant="outlined"
+									className="add-new-category-button"
+									onClick={() => {
+										setOpenPopup(true)
+										setCategoryForEdit(null);
+									}}
+								>
+									<AddIcon
+										className="add-category"
+										text="Add New"
+									/>
+									<p>Add new category</p>
+								</Button>
+							</Grid>
 						</Toolbar>
 						{
 							categories && (
